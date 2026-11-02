@@ -1,0 +1,218 @@
+{
+  "dashscope_api_key": {
+    "description": "阿里云百炼 API Key",
+    "type": "string",
+    "hint": "前往阿里云百炼控制台获取 (sk-xxx)，用于驱动语音合成与图片生成。",
+    "obvious_hint": true,
+    "secret": true,
+    "default": ""
+  },
+  "tts_settings": {
+    "description": "语音合成 (TTS) 核心设置",
+    "type": "object",
+    "items": {
+      "enable_tts": {
+        "description": "启用智能语音回复",
+        "type": "bool",
+        "default": true
+      },
+      "tts_model": {
+        "description": "千问语音合成模型名称",
+        "type": "string",
+        "default": "qwen-audio-3.1-tts-plus",
+        "hint": "默认使用 qwen-audio-3.1-tts-plus，也可填 cosyvoice-v1 或 qwen-tts 等百炼支持的模型。"
+      },
+      "tts_api_endpoint": {
+        "description": "百炼 TTS 接口地址",
+        "type": "string",
+        "default": "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
+        "hint": "支持多模态生成端点或音频合成专用端点，视具体模型协议自动适配。"
+      },
+      "trigger_mode": {
+        "description": "语音唤醒与触发模式",
+        "type": "string",
+        "options": [
+          "emotion_auto",
+          "hybrid_prob",
+          "always",
+          "keyword_only",
+          "off"
+        ],
+        "default": "emotion_auto",
+        "hint": "emotion_auto: AI仅在情绪激动/特殊语境自主发语音 | hybrid_prob: 情绪触发+日常随机概率 | always: 句句发语音 | keyword_only: 仅当用户要求听语音时触发"
+      },
+      "emotion_threshold": {
+        "description": "情绪触发敏感度阈值 (1-10)",
+        "type": "int",
+        "default": 6,
+        "hint": "仅当 AI 自评当前情绪强度 >= 该阈值时才转换为语音（数值越小越容易发语音，建议 6-8）。"
+      },
+      "base_probability": {
+        "description": "日常随机语音概率 (0.0 ~ 1.0)",
+        "type": "float",
+        "default": 0.15,
+        "hint": "在 hybrid_prob 模式下，即使情绪平稳也有该概率转为语音回复。"
+      },
+      "max_tts_chars": {
+        "description": "单条语音最大字数上限",
+        "type": "int",
+        "default": 120,
+        "hint": "超过此字数的长篇大论将自动降级为纯文本发送，避免高额扣费与超长语音体验差。"
+      },
+      "min_tts_chars": {
+        "description": "单条语音最小字数下限",
+        "type": "int",
+        "default": 2,
+        "hint": "低于此字数（如单个标点或“嗯”）不合成语音。"
+      },
+      "cooldown_seconds": {
+        "description": "同一会话语音发送冷却时间 (秒)",
+        "type": "int",
+        "default": 15,
+        "hint": "防止群聊刷屏导致连续发语音消耗大量 Token，0 为不限制（用户主动要求听语音时无视冷却）。"
+      },
+      "dual_send_text": {
+        "description": "发语音时是否同时发送对应文字",
+        "type": "bool",
+        "default": false,
+        "hint": "关闭后更像真人（只发语音条，除非包含代码块或补充长文才会拆分成 [语音 + 补充文本]）。"
+      },
+      "audio_format": {
+        "description": "请求音频封装格式",
+        "type": "string",
+        "options": ["mp3", "wav", "pcm"],
+        "default": "mp3",
+        "hint": "OneBot 协议端 (NapCat/Lagrange) 均原生支持接收 mp3/wav 并自动转码为 QQ 语音条。"
+      },
+      "max_tts_chunks": {
+        "description": "单条回复最多合成的语音段数",
+        "type": "int",
+        "default": 3,
+        "hint": "AI 一次回复中若包含多个 <tts> 标签，最多只合成前 N 段，防止扣费失控。"
+      }
+    }
+  },
+  "persona_voice_settings": {
+    "description": "AI 人设音色自适配与微调设置",
+    "type": "object",
+    "items": {
+      "auto_match_persona": {
+        "description": "启用 AI 根据人设自主设定音色",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后，首次启动时 AI 会阅读当前人格设定 (Persona)，从千问音色库中挑选最符合自己设定的音色、基准语速和语调并持久化锁定。"
+      },
+      "manual_override_voice": {
+        "description": "手动强制指定音色 ID (留空则交由 AI 自主决定)",
+        "type": "string",
+        "default": "",
+        "hint": "若填写（如 Cherry / Ethan / longxiaochun），将覆盖 AI 自主选择的音色。"
+      },
+      "allow_dynamic_prosody": {
+        "description": "允许情绪动态改变语速与语调",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后，AI 激动/生气时语速加快、音调变高；委屈/困倦时语速放慢、语气低沉。"
+      },
+      "auto_recalibrate_on_persona_change": {
+        "description": "人设变更后自动重新挑选音色",
+        "type": "bool",
+        "default": false,
+        "hint": "开启后，每次检测到 Persona 内容哈希变化，就会让 AI 重新“觉醒”一次音色（会额外消耗一次 LLM 调用）。"
+      }
+    }
+  },
+  "image_settings": {
+    "description": "千问图像生成 (qwen-image-2.1-pro) 设置",
+    "type": "object",
+    "items": {
+      "enable_image_gen": {
+        "description": "启用图像生成功能",
+        "type": "bool",
+        "default": true
+      },
+      "image_model": {
+        "description": "千问图像生成模型名称",
+        "type": "string",
+        "default": "qwen-image-2.1-pro"
+      },
+      "image_trigger_mode": {
+        "description": "生图触发方式",
+        "type": "string",
+        "options": ["auto_and_command", "command_only"],
+        "default": "auto_and_command",
+        "hint": "auto_and_command: 支持 AI 在聊天中自主决定配图/发自拍，同时支持 /draw 命令 | command_only: 仅通过命令触发"
+      },
+      "default_size": {
+        "description": "默认图片分辨率",
+        "type": "string",
+        "options": ["1024*1024", "720*1280", "1280*720"],
+        "default": "1024*1024"
+      },
+      "negative_prompt": {
+        "description": "全局默认反向提示词 (Negative Prompt)",
+        "type": "string",
+        "default": "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, watermark, blurry"
+      },
+      "poll_timeout_seconds": {
+        "description": "异步生图轮询最大超时时间 (秒)",
+        "type": "int",
+        "default": 60,
+        "hint": "超时后自动尝试同步生图协议；两次都失败则友好提示用户。"
+      },
+      "max_images_per_reply": {
+        "description": "单条回复最多生成的图片数量",
+        "type": "int",
+        "default": 2
+      }
+    }
+  },
+  "group_control": {
+    "description": "群聊与私聊黑白名单控制",
+    "type": "object",
+    "items": {
+      "enable_in_private": {
+        "description": "私聊允许触发语音与生图",
+        "type": "bool",
+        "default": true
+      },
+      "group_mode": {
+        "description": "群聊控制模式",
+        "type": "string",
+        "options": ["all", "whitelist", "blacklist"],
+        "default": "all"
+      },
+      "group_list": {
+        "description": "群号列表 (白名单或黑名单)",
+        "type": "list",
+        "items": {
+          "type": "string"
+        },
+        "default": []
+      }
+    }
+  },
+  "advanced": {
+    "description": "高级网络与调试设置",
+    "type": "object",
+    "items": {
+      "request_timeout_seconds": {
+        "description": "单次 HTTP 请求超时时间 (秒)",
+        "type": "int",
+        "default": 120
+      },
+      "temp_file_ttl_seconds": {
+        "description": "临时音视频文件保留时间 (秒)",
+        "type": "int",
+        "default": 60,
+        "hint": "发送完成后延迟删除，确保 NapCat/Lagrange 已完成读取与 SILK 转码；不要设置得太小。"
+      },
+      "sample_rate": {
+        "description": "语音采样率",
+        "type": "int",
+        "default": 24000,
+        "options": [16000, 22050, 24000, 44100]
+      }
+    }
+  }
+}

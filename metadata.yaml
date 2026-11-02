@@ -1,0 +1,12 @@
+name: astrbot_plugin_qwen_multimodal
+display_name: 千问灵动多模态
+short_desc: 人设自选音色 + 情绪驱动语调 + 聊天随手配图，让 AI 像真人一样开口说话。
+desc: 基于阿里云百炼千问 TTS 与千问生图的高度拟人化多模态插件。支持 AI 阅读人设后自主挑选并锁定专属音色、根据情绪波动动态触发语音并调制语调语速、以及在对话中自然触发配图生成。模型不可用时会自动降级到账号可用的备选模型。
+version: 1.0.0
+author: guok0324
+repo: https://github.com/guok0324/astrbot_plugin_qwen_multimodal
+astrbot_version: ">=4.5.7"
+support_platforms:
+  - aiocqhttp
+  - telegram
+  - lark

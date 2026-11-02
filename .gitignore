@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+data/
+temp_audio/
+temp_image/
+qwen_multimodal_state.json
+.DS_Store
+Thumbs.db
